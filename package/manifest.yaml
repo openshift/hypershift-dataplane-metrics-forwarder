@@ -7,28 +7,36 @@ spec:
     - Namespaced
   phases:
     - name: rbac
-    - name: certman
+      objects:
+      - object: {apiVersion: v1, kind: ServiceAccount}
+      - object: {apiVersion: rbac.authorization.k8s.io/v1, kind: Role}
+      - object: {apiVersion: rbac.authorization.k8s.io/v1, kind: RoleBinding}
+    - name: certman-root-ca
+      objects:
+      - object: {apiVersion: batch/v1, kind: CronJob}
+    - name: certman-issuer
+      objects:
+      - object: {apiVersion: cert-manager.io/v1, kind: Issuer}
+    - name: certman-cert
+      objects:
+      - object: {apiVersion: cert-manager.io/v1, kind: Certificate}
     - name: config
+      objects:
+      - object: {apiVersion: v1, kind: ConfigMap}
     - name: deploy
+      objects:
+      - object: {apiVersion: apps, kind: Deployment}
     - name: expose
+      objects:
+      - object: {apiVersion: v1, kind: Service}
+      - object: {apiVersion: route.openshift.io/v1, kind: Route}
   availabilityProbes:
     - selector:
         kind:
-          group: v1
-          kind: ConfigMap
+          groups: cert-manager.io
+          kind: Issuer
       probes:
       - condition:
-        type: Available
-        status: "True"
-    - selector:
-        kind:
-          group: apps/v1
-          kind: Deployment
-      probes:
-      - condition:
-          type: Available
+          type: Ready
           status: "True"
-      - fieldsEqual:
-          fieldA: .status.updatedReplicas
-          fieldB: .status.replicas
         

@@ -35,7 +35,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata:
   annotations:
-    package-operator.run/phase: certman
+    package-operator.run/phase: certman-root-ca
   name: metrics-forwarder-secret-ensurer
 spec:
   failedJobsHistoryLimit: 1
@@ -96,7 +96,7 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   annotations:
-    package-operator.run/phase: certman
+    package-operator.run/phase: certman-issuer
   name: metrics-forwarder-ca-issuer
 spec:
   ca:
@@ -106,7 +106,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   annotations:
-    package-operator.run/phase: certman
+    package-operator.run/phase: certman-cert
   name: metrics-forwarder-cert
 spec:
   # Secret names are always required.
@@ -132,7 +132,7 @@ spec:
   isCA: false
   privateKey:
     algorithm: RSA
-    encoding: X509
+    encoding: PKCS1
     size: 2048
   usages:
     - server auth
