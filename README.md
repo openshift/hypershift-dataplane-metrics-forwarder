@@ -22,12 +22,12 @@ Additionally, the CMO on the Data Plane is configured using another Policy that 
 
 The Proxy needs to be initialized to work properly. This phase might not be needed later if the root-ca contains certificates that are compatible with Cert Manager.
 Initially, PKO Package deploys 4 resources:
-- ServiceAccount named metrics-forwarder-sa
-- Role named metrics-forwarder-secret-ensurer
-- RoleBinding named metrics-forwarder-secret-rolebinding
-- CronJob named metrics-forwarder-secret-ensurer
+- ServiceAccount
+- Role
+- RoleBinding
+- CronJob
 
-This CronJob mianly recreates the root-ca (metrics-forwarder-secret) in the HCP with names that are compatible with Cert Manager. 
+This CronJob mianly recreates the root-ca in the HCP with names that are compatible with Cert Manager. 
 
 ## Contact
 ___
