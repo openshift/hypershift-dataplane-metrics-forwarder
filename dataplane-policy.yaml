@@ -32,9 +32,6 @@ spec:
                       config.yaml: |
                         enableUserWorkload: true
                         prometheusK8s:
-                        # If the location of this config changes,
-                        # make sure to adjust https://github.com/openshift/ops-sop/blob/master/v4/howto/observability/o11m_mst_killswitch.md
-                        # so that killswitch instructions point to the right file!
                           externalLabels:
                             source: "DP"
                           replicas: 2
