@@ -111,24 +111,15 @@ metadata:
 spec:
   # Secret names are always required.
   secretName: metrics-forwarder-secret
-
-  # secretTemplate is optional. If set, these annotations and labels will be
-  # copied to the Secret named example-com-tls. These labels and annotations will
-  # be re-reconciled if the Certificate's secretTemplate changes. secretTemplate
-  # is also enforced, so relevant label and annotation changes on the Secret by a
-  # third party will be overwriten by cert-manager to match the secretTemplate.
   secretTemplate:
     labels:
       app: metrics-forwarder
 
-  duration: 21600h 
+  duration: 25960h 
   renewBefore: 360h # 15d
   subject:
     organizations:
       - openshift
-  # The use of the common name field has been deprecated since 2000 and is
-  # discouraged from being used.
-  commonName: 
   isCA: false
   privateKey:
     algorithm: RSA
