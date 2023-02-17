@@ -28,7 +28,3 @@ Initially, PKO package deploys 4 resources:
 - CronJob
 
 This CronJob mainly recreates the root-ca in the HCP with names that are compatible with cert-manager. 
-
-## Contact
-___
-- Red Hat Internal Slack #sd-sre-team-thor
