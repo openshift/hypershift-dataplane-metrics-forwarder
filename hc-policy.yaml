@@ -149,10 +149,6 @@ spec:
       operator: In
       values:
       - 'true'
-    - key: name
-      operator: In
-      values:
-      - '21smh37kqriosut45c6c5taugv7ovvq5'
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
