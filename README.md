@@ -27,7 +27,7 @@ Initially, PKO package deploys 4 resources:
 - RoleBinding
 - CronJob
 
-This CronJob mianly recreates the root-ca in the HCP with names that are compatible with Cert Manager. 
+This CronJob mainly recreates the root-ca in the HCP with names that are compatible with cert-manager. 
 
 ## Contact
 ___
