@@ -1,6 +1,6 @@
 # Metrics Forwarder
 
-The Metrics Forwarder is a Proxy that lives in each Hosted Control Plane (HCP) Namespace in Management Clusters. The main goal of this Proxy is to let the relevant Hosted Cluster's Data Plane push metrics to RHOBS. This proxy exposes a route that is known to the Cluster Monitoring Operator (CMO) running in the Data Plane. The CMO pushes the metrics to this route. And the proxy simply forwards this request to the Openshift Observability Operator (OBO) running on the relevant Management Cluster. This way the metrics ultimately end up in RHOBS.
+The dataplane metrics forwarder is a proxy that lives in each hosted control plane (HCP) namespace in management clusters. The main goal of this proxy is to let the hosted clusters push metrics to RHOBS. This proxy exposes a route that is known to the Cluster Monitoring Operator (CMO) running in the dataplane. The CMO pushes the metrics to this route. And the proxy simply forwards this request to the OpenShift Observability Operator (OBO) running on the relevant management cluster. This way the dataplane metrics ultimately end up in RHOBS.
 
 ## Deployment process
 
