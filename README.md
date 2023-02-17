@@ -20,8 +20,8 @@ Additionally, the CMO on the dataplane is configured using another policy that o
 
 ## Proxy initialization process
 
-The Proxy needs to be initialized to work properly. This phase might not be needed later if the root-ca contains certificates that are compatible with Cert Manager.
-Initially, PKO Package deploys 4 resources:
+The proxy needs to be initialized to work properly. This phase might not be needed later if the root-ca contains certificates that are compatible with [cert-manager](https://cert-manager.io/).
+Initially, PKO package deploys 4 resources:
 - ServiceAccount
 - Role
 - RoleBinding
