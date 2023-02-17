@@ -4,7 +4,7 @@ The dataplane metrics forwarder is a proxy that lives in each hosted control pla
 
 ## Deployment process
 
-The proxy is deployed using ACM policy. The ACM Policy targets all Management Clusters and only HCP Namespaces in those Management Clusters. It deploys a PKO Package which deploys the resources the proxy needs. The resources it deploys are:
+The proxy is deployed using ACM policy. The ACM policy targets all management clusters and only HCP namespaces in those management clusters. It deploys a PKO package which deploys the resources the proxy needs. The resources it deploys are:
 - ServiceAccount
 - Role
 - RoleBinding
