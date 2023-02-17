@@ -16,7 +16,7 @@ The proxy is deployed using ACM policy. The ACM policy targets all management cl
 - Service
 - Route
 
-Additionally, the CMO on the Data Plane is configured using another Policy that only targets Hosted Clusters.
+Additionally, the CMO on the dataplane is configured using another policy that only targets hosted clusters.
 
 ## Proxy initialization process
 
