@@ -98,13 +98,6 @@ spec:
                             - effect: NoSchedule
                               key: node-role.kubernetes.io/worker
                               operator: Exists
-                        grafana:
-                          nodeSelector:
-                            node-role.kubernetes.io/worker: ""
-                          tolerations:
-                            - effect: NoSchedule
-                              key: node-role.kubernetes.io/worker
-                              operator: Exists
                         k8sPrometheusAdapter:
                           nodeSelector:
                             node-role.kubernetes.io/worker: ""
