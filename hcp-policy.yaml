@@ -21,7 +21,11 @@ spec:
                 compliant: 2h
                 noncompliant: 45s
             namespaceSelector:
-              include: ['ocm-staging-21smh37kqriosut45c6c5taugv7ovvq5-taf-dpmet2']
+              matchExpressions:
+              - key: hypershift.openshift.io/hosted-control-plane
+                operator: In
+                values:
+                - 'true'
             object-templates:
               - complianceType: musthave
                 objectDefinition:
@@ -43,10 +47,10 @@ spec:
     type: ManagedClusterConditionAvailable
   clusterSelector:
     matchExpressions:
-    - key: name
+    - key: hypershift.open-cluster-management.io/management-cluster
       operator: In
       values:
-        - 'hs-mc-jsui4ri9g'
+        - 'true'
 ---
 apiVersion: policy.open-cluster-management.io/v1
 kind: PlacementBinding
