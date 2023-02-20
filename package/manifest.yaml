@@ -1,0 +1,42 @@
+apiVersion: manifests.package-operator.run/v1alpha1
+kind: PackageManifest
+metadata:
+  name: metrics-forwarder
+spec:
+  scopes:
+    - Namespaced
+  phases:
+    - name: rbac
+      objects:
+      - object: {apiVersion: v1, kind: ServiceAccount}
+      - object: {apiVersion: rbac.authorization.k8s.io/v1, kind: Role}
+      - object: {apiVersion: rbac.authorization.k8s.io/v1, kind: RoleBinding}
+    - name: certman-root-ca
+      objects:
+      - object: {apiVersion: batch/v1, kind: CronJob}
+    - name: certman-issuer
+      objects:
+      - object: {apiVersion: cert-manager.io/v1, kind: Issuer}
+    - name: certman-cert
+      objects:
+      - object: {apiVersion: cert-manager.io/v1, kind: Certificate}
+    - name: config
+      objects:
+      - object: {apiVersion: v1, kind: ConfigMap}
+    - name: deploy
+      objects:
+      - object: {apiVersion: apps, kind: Deployment}
+    - name: expose
+      objects:
+      - object: {apiVersion: v1, kind: Service}
+      - object: {apiVersion: route.openshift.io/v1, kind: Route}
+  availabilityProbes:
+    - selector:
+        kind:
+          groups: cert-manager.io
+          kind: Issuer
+      probes:
+      - condition:
+          type: Ready
+          status: "True"
+

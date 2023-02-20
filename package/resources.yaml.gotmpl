@@ -1,0 +1,276 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  annotations:
+    package-operator.run/phase: rbac
+  name: metrics-forwarder-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  annotations:
+    package-operator.run/phase: rbac
+  name: metrics-forwarder-secret-ensurer
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get", "list", "create", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  annotations:
+    package-operator.run/phase: rbac
+  name: metrics-forwarder-secret-rolebinding
+subjects:
+- kind: ServiceAccount
+  name: metrics-forwarder-sa
+roleRef:
+  kind: Role
+  name: metrics-forwarder-secret-ensurer
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  annotations:
+    package-operator.run/phase: certman-root-ca
+  name: metrics-forwarder-secret-ensurer
+spec:
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 3
+  concurrencyPolicy: Allow
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 900
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          containers:
+          - name: secret-ensurer
+            image: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
+            imagePullPolicy: Always
+            resources: {}                                                                                                                                                                 
+            terminationMessagePath: /dev/termination-log                                                                                                                                  
+            terminationMessagePolicy: File
+            command:
+            - /bin/bash
+            - -c
+            - |
+              #!/bin/bash
+
+              # Check first if we need to create the alternative root ca
+              CERTMAN_CA=$(oc get secret certman-root-ca --ignore-not-found)
+              if [[ -n $CERTMAN_CA ]]; then
+                echo "The certman-root-ca secret already exists, avoiding recreating"
+                exit 0
+              fi
+
+              # Check if root-ca exists, we can't create the additional secret without it
+              ROOT_CA=$(oc get secret root-ca --ignore-not-found)
+              if [[ -z $ROOT_CA ]]; then
+                echo "The root-ca does not exist, it is required to exist"
+                exit 0
+              fi
+
+              # Move to where the user has permissions
+              mkdir /tmp/certifcate && cd /tmp/certifcate
+
+              # Get the secret key and crt from root-ca
+              oc get secret root-ca -o json | jq -r '.data["ca.crt"]' | base64 --decode > ca.crt
+              oc get secret root-ca -o json | jq -r '.data["ca.key"]' | base64 --decode > ca.key
+
+              # Create TLS secret so that it is Cert Manager compatible
+              oc create secret tls certman-root-ca --key ca.key --cert ca.crt
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          schedulerName: default-scheduler
+          securityContext: {}
+          serviceAccount: metrics-forwarder-sa
+          serviceAccountName: metrics-forwarder-sa
+          terminationGracePeriodSeconds: 30
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  annotations:
+    package-operator.run/phase: certman-issuer
+  name: metrics-forwarder-ca-issuer
+spec:
+  ca:
+    secretName: certman-root-ca
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  annotations:
+    package-operator.run/phase: certman-cert
+  name: metrics-forwarder-cert
+spec:
+  # Secret names are always required.
+  secretName: metrics-forwarder-secret
+  secretTemplate:
+    labels:
+      app: metrics-forwarder
+
+  duration: 25960h 
+  renewBefore: 360h # 15d
+  subject:
+    organizations:
+      - openshift
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  usages:
+    - server auth
+    - client auth
+  # At least one of a DNS Name, URI, or IP address is required.
+  dnsNames:
+    - apps.{{ with $x := .package.metadata.namespace }}{{ (splitn "-" 4 $x)._3 }}{{end}}.hypershift.local
+    - localhost
+  # Issuer references are always required.
+  issuerRef:
+    name: metrics-forwarder-ca-issuer
+    # We can reference ClusterIssuers by changing the kind here.
+    # The default value is Issuer (i.e. a locally namespaced Issuer)
+    kind: Issuer
+    # This is optional since cert-manager will default to this value however
+    # if you are using an external issuer, change this to that issuer group.
+    group: cert-manager.io
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metrics-forwarder-config
+  labels:
+    app.kubernetes.io/name: metrics-forwarder
+  annotations:
+    package-operator.run/phase: config
+data:
+  nginx.conf: |
+    user  nginx;
+    worker_processes  1;
+    error_log  /tmp/error.log warn;
+    pid        /tmp/nginx.pid;
+    events {
+        worker_connections  1024;
+    }
+    http {
+      client_body_temp_path /tmp/client_temp;
+      proxy_temp_path       /tmp/proxy_temp_path;
+      fastcgi_temp_path     /tmp/fastcgi_temp;
+      uwsgi_temp_path       /tmp/uwsgi_temp;
+      scgi_temp_path        /tmp/scgi_temp;
+
+      include       /etc/nginx/mime.types;
+      default_type  application/octet-stream;
+      log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                          '$status $body_bytes_sent "$http_referer" '
+                          '"$http_user_agent" "$http_x_forwarded_for"';
+      access_log  /var/log/nginx/access.log  main;
+      sendfile        on;
+      keepalive_timeout  65;
+      server {
+        listen 8001;
+        listen 8003 ssl;
+
+        server_name metrics-forwarder.apps.{{ with $x := .package.metadata.namespace }}{{ (splitn "-" 4 $x)._3 }}{{end}}.hypershift.local;
+
+        ssl_certificate /etc/nginx/cert/tls.crt;
+        ssl_certificate_key  /etc/nginx/cert/tls.key;
+
+
+        location /healthz {
+          return 200;
+        }
+
+        location / {
+          proxy_pass http://hypershift-monitoring-stack-prometheus.openshift-observability-operator.svc.cluster.local:9090/api/v1/write;
+            proxy_buffering off;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-Host $host;
+            proxy_set_header X-Forwarded-Port $server_port;
+        }
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-forwarder-deployment
+  labels:
+    app: metrics-forwarder
+  annotations:
+    package-operator.run/phase: deploy
+spec:
+  selector:
+    matchLabels:
+      app: metrics-forwarder
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: metrics-forwarder
+    spec:
+      containers:
+        - name: nginx
+          image: registry.access.redhat.com/ubi8/nginx-120
+          command: ["nginx", "-g", "daemon off;"]
+          ports:
+          - containerPort: 8001
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - mountPath: /etc/nginx/cert
+              name: nginx-cert
+      volumes:
+        - name: nginx-config
+          configMap:
+            defaultMode: 420
+            name: metrics-forwarder-config
+        - name: nginx-cert
+          secret:
+            defaultMode: 420
+            secretName: metrics-forwarder-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-forwarder
+  annotations:
+    package-operator.run/phase: expose
+spec:
+  selector:
+    app: metrics-forwarder
+  ports:
+  - protocol: TCP
+    port: 8003
+    targetPort: 8003
+    name: nginx
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    hypershift.openshift.io/hosted-control-plane: {{.package.metadata.namespace}}
+    hypershift.openshift.io/internal-route: "true"
+  annotations:
+    package-operator.run/phase: expose
+  name: metrics-forwarder
+spec:
+  host: metrics-forwarder.apps.{{ with $x := .package.metadata.namespace }}{{ (splitn "-" 4 $x)._3 }}{{end}}.hypershift.local
+  tls:
+    insecureEdgeTerminationPolicy: None
+    termination: passthrough
+  port:
+    targetPort: 8003
+  to:
+    kind: Service
+    name: metrics-forwarder
+    weight: 100
+  wildcardPolicy: None
