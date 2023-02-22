@@ -225,11 +225,11 @@ objects:
             namespace: openshift-acm-policies
           spec:
             clusterSelector:
-            matchExpressions:
-              - key: hypershift.open-cluster-management.io/hosted-cluster
-                operator: In
-                values:
-                  - 'true'
+              matchExpressions:
+                - key: hypershift.open-cluster-management.io/hosted-cluster
+                  operator: In
+                  values:
+                    - 'true'
         - apiVersion: policy.open-cluster-management.io/v1
           kind: PlacementBinding
           metadata:
