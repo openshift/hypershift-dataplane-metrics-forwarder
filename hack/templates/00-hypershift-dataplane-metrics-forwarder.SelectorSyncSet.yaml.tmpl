@@ -224,12 +224,15 @@ objects:
             name: placement-metrics-forwarder-config
             namespace: openshift-acm-policies
           spec:
+            clusterConditions:
+            - status: "True"
+              type: ManagedClusterConditionAvailable
             clusterSelector:
               matchExpressions:
                 - key: hypershift.open-cluster-management.io/hosted-cluster
                   operator: In
                   values:
-                    - 'true'
+                    - "true"
         - apiVersion: policy.open-cluster-management.io/v1
           kind: PlacementBinding
           metadata:
