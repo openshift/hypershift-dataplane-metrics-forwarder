@@ -135,6 +135,7 @@ objects:
                                     targetLabel: _id
                                     action: replace
                                   - sourceLabels: [__name__]
+                                    regex: '(apiserver_request_duration_seconds_bucket|apiserver_request_duration_seconds_count|apiserver_request_total|kube_node_labels|kube_node_spec_unschedulable|kube_node_status_condition)'
                                     action: keep
                                   queueConfig:
                                     capacity: 10000
