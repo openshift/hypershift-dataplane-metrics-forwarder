@@ -7,6 +7,8 @@ parameters:
     required: true
   - name: IMAGE_DIGEST
     required: true
+  - name: TELEMETER_SERVER_URL
+    required: true
 objects:
   - apiVersion: hive.openshift.io/v1
     kind: SelectorSyncSet
@@ -183,7 +185,7 @@ objects:
                                 - effect: NoSchedule
                                   key: node-role.kubernetes.io/worker
                                   operator: Exists
-                              telemeterServerURL: https://infogw.api.stage.openshift.com
+                              telemeterServerURL: ${TELEMETER_SERVER_URL}
                             prometheusOperator:
                               nodeSelector:
                                 node-role.kubernetes.io/worker: ""
