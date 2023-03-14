@@ -8,16 +8,8 @@ reviewers:
 
 approvers:
   - wanghaoran1988
-  - cblecker
-  - jharrington22
   - feichashao
   - supreeth7
   - Tafhim
-
-maintainers:
-  - wanghaoran1988
-  - feichashao
-  - reetika-vyas
-  - supreeth7
-  - MitaliBhalla
-  - Tafhim
+  - srep-team-leads
+  - sre-architects
