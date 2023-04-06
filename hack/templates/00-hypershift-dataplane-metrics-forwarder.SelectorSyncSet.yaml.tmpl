@@ -130,7 +130,7 @@ objects:
                                 source: "DP"
                               replicas: 2
                               remoteWrite:
-                                - url: https://metrics-forwarder.apps.{{ ( split "." (lookup "route.openshift.io/v1" "Route" "openshift-monitoring" "prometheus-k8s").spec.host )._2 }}.hypershift.local
+                                - url: https://metrics-forwarder.apps.{{ ( split "." (lookup "route.openshift.io/v1" "Route" "openshift-monitoring" "prometheus-k8s").spec.host )._3 }}.hypershift.local
                                   remoteTimeout: 30s
                                   writeRelabelConfigs:
                                   - sourceLabels: [__tmp_openshift_cluster_id__]
