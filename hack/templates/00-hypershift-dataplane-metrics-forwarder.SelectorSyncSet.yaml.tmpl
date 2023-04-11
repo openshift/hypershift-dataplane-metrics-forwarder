@@ -137,7 +137,7 @@ objects:
                                     targetLabel: _id
                                     action: replace
                                   - sourceLabels: [__name__]
-                                    regex: '(apiserver_request_duration_seconds_bucket|apiserver_request_duration_seconds_count|apiserver_request_total|kube_node_labels|cluster:capacity_cpu_cores:sum|cluster:capacity_memory_bytes:sum|cluster:memory_usage_bytes:sum|cluster:node_instance_type_count:sum|cluster:virt_platform_nodes:sum|console_url|kube_node_spec_unschedulable|kube_node_status_condition|node_role_os_version_machine:cpu_capacity_cores:sum|node_role_os_version_machine:cpu_capacity_cores:sum|node_role_os_version_machine:cpu_capacity_sockets:sum|up)'
+                                    regex: '(apiserver_request_duration_seconds_bucket|apiserver_request_duration_seconds_count|apiserver_request_total|kube_node_labels|cluster:capacity_cpu_cores:sum|cluster:capacity_memory_bytes:sum|cluster:memory_usage_bytes:sum|cluster:node_instance_type_count:sum|cluster:virt_platform_nodes:sum|console_url|kube_node_spec_unschedulable|kube_node_status_condition|node_role_os_version_machine:cpu_capacity_cores:sum|node_role_os_version_machine:cpu_capacity_cores:sum|node_role_os_version_machine:cpu_capacity_sockets:sum|up|probe_success)'
                                     action: keep
                                   queueConfig:
                                     capacity: 10000
