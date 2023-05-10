@@ -176,16 +176,33 @@ objects:
                             alertmanagerMain:
                               nodeSelector:
                                 node-role.kubernetes.io/worker: ""
+                              topologySpreadConstraints:
+                                - maxSkew: 1
+                                  topologyKey: topology.kubernetes.io/zone
+                                  whenUnsatisfiable: ScheduleAnyway
+                                  labelSelector:
+                                    matchLabels:
+                                      app: prometheus
+                                  nodeAffinityPolicy: Honor
+                                  nodeTaintsPolicy: Honor
+                                - maxSkew: 1
+                                  topologyKey: node-role.kubernetes.io/infra
+                                  whenUnsatisfiable: ScheduleAnyway
+                                  labelSelector:
+                                    matchLabels:
+                                      app: prometheus
+                                  nodeAffinityPolicy: Honor
+                                  nodeTaintsPolicy: Honor
                               tolerations:
                                 - effect: NoSchedule
-                                  key: node-role.kubernetes.io/worker
+                                  key: node-role.kubernetes.io/infra
                                   operator: Exists
                             telemeterClient:
                               nodeSelector:
                                 node-role.kubernetes.io/worker: ""
                               tolerations:
                                 - effect: NoSchedule
-                                  key: node-role.kubernetes.io/worker
+                                  key: node-role.kubernetes.io/infra
                                   operator: Exists
                               telemeterServerURL: ${TELEMETER_SERVER_URL}
                             prometheusOperator:
@@ -193,35 +210,35 @@ objects:
                                 node-role.kubernetes.io/worker: ""
                               tolerations:
                                 - effect: NoSchedule
-                                  key: node-role.kubernetes.io/worker
+                                  key: node-role.kubernetes.io/infra
                                   operator: Exists
                             k8sPrometheusAdapter:
                               nodeSelector:
                                 node-role.kubernetes.io/worker: ""
                               tolerations:
                                 - effect: NoSchedule
-                                  key: node-role.kubernetes.io/worker
+                                  key: node-role.kubernetes.io/infra
                                   operator: Exists
                             kubeStateMetrics:
                               nodeSelector:
                                 node-role.kubernetes.io/worker: ""
                               tolerations:
                                 - effect: NoSchedule
-                                  key: node-role.kubernetes.io/worker
+                                  key: node-role.kubernetes.io/infra
                                   operator: Exists
                             openshiftStateMetrics:
                               nodeSelector:
                                 node-role.kubernetes.io/worker: ""
                               tolerations:
                                 - effect: NoSchedule
-                                  key: node-role.kubernetes.io/worker
+                                  key: node-role.kubernetes.io/infra
                                   operator: Exists
                             thanosQuerier:
                               nodeSelector:
                                 node-role.kubernetes.io/worker: ""
                               tolerations:
                                 - effect: NoSchedule
-                                  key: node-role.kubernetes.io/worker
+                                  key: node-role.kubernetes.io/infra
                                   operator: Exists
         - apiVersion: apps.open-cluster-management.io/v1
           kind: PlacementRule
