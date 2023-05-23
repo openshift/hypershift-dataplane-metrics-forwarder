@@ -1,15 +1,16 @@
 reviewers:
   - wanghaoran1988
   - feichashao
-  - reetika-vyas
   - supreeth7
   - MitaliBhalla
   - Tafhim
+  - bmeng
 
 approvers:
   - wanghaoran1988
   - feichashao
   - supreeth7
+  - bmeng
   - Tafhim
   - srep-team-leads
   - sre-architects
