@@ -170,7 +170,8 @@ data:
       default_type  application/octet-stream;
       log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
                           '$status $body_bytes_sent "$http_referer" '
-                          '"$http_user_agent" "$http_x_forwarded_for"';
+                          '"$http_user_agent" "$http_x_forwarded_for"'
+                          ' Proxy: "$proxy_host" "$upstream_addr"';
       access_log  /var/log/nginx/access.log  main;
       sendfile        on;
       keepalive_timeout  65;
@@ -216,6 +217,7 @@ spec:
       labels:
         app: metrics-forwarder
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: nginx
           image: registry.access.redhat.com/ubi8/nginx-120
