@@ -241,6 +241,12 @@ spec:
                   hypershift.openshift.io/hosted-control-plane: '{{.package.metadata.namespace}}'
               topologyKey: kubernetes.io/hostname
             weight: 100
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: metrics-forwarder
+            topologyKey: topology.kubernetes.io/zone
       containers:
         - name: nginx
           image: registry.access.redhat.com/ubi8/nginx-120
