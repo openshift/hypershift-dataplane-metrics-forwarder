@@ -216,6 +216,37 @@ spec:
       labels:
         app: metrics-forwarder
     spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: hypershift.openshift.io/hosted-control-plane
+                operator: In
+                values:
+                - "true"
+            weight: 50
+          - preference:
+              matchExpressions:
+              - key: hypershift.openshift.io/cluster
+                operator: In
+                values:
+                - '{{.package.metadata.namespace}}'
+            weight: 100
+        podAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  hypershift.openshift.io/hosted-control-plane: '{{.package.metadata.namespace}}'
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: metrics-forwarder
+            topologyKey: topology.kubernetes.io/zone
       containers:
         - name: nginx
           image: registry.access.redhat.com/ubi8/nginx-120
@@ -228,6 +259,15 @@ spec:
               subPath: nginx.conf
             - mountPath: /etc/nginx/cert
               name: nginx-cert
+      tolerations:
+        - effect: NoSchedule
+          key: hypershift.openshift.io/hosted-control-plane
+          operator: Equal
+          value: "true"
+        - effect: NoSchedule
+          key: hypershift.openshift.io/cluster
+          operator: Equal
+          value: '{{.package.metadata.namespace}}'
       volumes:
         - name: nginx-config
           configMap:
