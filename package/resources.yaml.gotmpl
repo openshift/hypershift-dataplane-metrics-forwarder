@@ -170,7 +170,8 @@ data:
       default_type  application/octet-stream;
       log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
                           '$status $body_bytes_sent "$http_referer" '
-                          '"$http_user_agent" "$http_x_forwarded_for"';
+                          '"$http_user_agent" "$http_x_forwarded_for"'
+                          ' Proxy: "$proxy_host" "$upstream_addr"';
       access_log  /var/log/nginx/access.log  main;
       sendfile        on;
       keepalive_timeout  65;
@@ -198,10 +199,38 @@ data:
       }
     }
 ---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: metrics-forwarder 
+  annotations:
+    package-operator.run/phase: deploy
+spec:
+  egress:
+  - ports:
+    - port: 5353
+      protocol: UDP
+    - port: 5353
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: openshift-dns
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: openshift-observability-operator
+      podSelector: {}
+  podSelector:
+    matchLabels:
+      app: metrics-forwarder
+  policyTypes:
+  - Egress
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: metrics-forwarder-deployment
+  name: metrics-forwarder
   labels:
     app: metrics-forwarder
   annotations:
@@ -247,6 +276,7 @@ spec:
               matchLabels:
                 app: metrics-forwarder
             topologyKey: topology.kubernetes.io/zone
+      automountServiceAccountToken: false
       containers:
         - name: nginx
           image: registry.access.redhat.com/ubi8/nginx-120
@@ -314,3 +344,4 @@ spec:
     name: metrics-forwarder
     weight: 100
   wildcardPolicy: None
+
