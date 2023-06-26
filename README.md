@@ -27,4 +27,21 @@ Initially, PKO package deploys 4 resources:
 - RoleBinding
 - CronJob
 
-This CronJob mainly recreates the root-ca in the HCP with names that are compatible with cert-manager. 
+This CronJob mainly recreates the root-ca in the HCP with names that are compatible with cert-manager.
+
+## Testing
+
+### Prerequisites
+
+- kubectl - You will need the Kubernetes CLI, [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl), to deploy and interact with Package Operator and your packages.
+- kubectl-package - Package Operator provides a kubectl plugin to validate, package and inspect Package Operator packages. The binaries can be found on the Package Operator [releases](https://github.com/package-operator/package-operator/releases) page.
+
+The [Package Operator](https://github.com/package-operator/package-operator) includes a template test framework that makes it easier to identify template errors without having the need of deploying the Package.
+
+For each template test, Package Operator will auto-generate fixtures into the `.test-fixtures` and the test cases that can be defined in the PackageManifest.
+
+To validate the package run this command in the project's root:
+```
+$ kubectl package validate ./package
+```
+If you alter the source templates, either manually update the fixtures to satisfy our expectations - or delete the `.test-fixtures` directory, and the next kubectl package validate call will regenerate the directory, allowing you to review changes in git.
