@@ -31,6 +31,11 @@ This CronJob mainly recreates the root-ca in the HCP with names that are compati
 
 ## Testing
 
+### Prerequisites
+
+- kubectl - You will need the Kubernetes CLI, [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl), to deploy and interact with Package Operator and your packages.
+- kubectl-package - Package Operator provides a kubectl plugin to validate, package and inspect Package Operator packages. The binaries can be found on the Package Operator [releases](https://github.com/package-operator/package-operator/releases) page.
+
 The [Package Operator](https://github.com/package-operator/package-operator) includes a template test framework that makes it easier to identify template errors without having the need of deploying the Package.
 
 For each template test, Package Operator will auto-generate fixtures into the `.test-fixtures` and the test cases that can be defined in the PackageManifest.
