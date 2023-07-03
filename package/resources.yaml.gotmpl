@@ -1,97 +1,4 @@
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  annotations:
-    package-operator.run/phase: rbac
-  name: metrics-forwarder-sa
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  annotations:
-    package-operator.run/phase: rbac
-  name: metrics-forwarder-secret-ensurer
-rules:
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get", "list", "create", "delete"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  annotations:
-    package-operator.run/phase: rbac
-  name: metrics-forwarder-secret-rolebinding
-subjects:
-- kind: ServiceAccount
-  name: metrics-forwarder-sa
-roleRef:
-  kind: Role
-  name: metrics-forwarder-secret-ensurer
-  apiGroup: rbac.authorization.k8s.io
----
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  annotations:
-    package-operator.run/phase: certman-root-ca
-  name: metrics-forwarder-secret-ensurer
-spec:
-  failedJobsHistoryLimit: 1
-  successfulJobsHistoryLimit: 3
-  concurrencyPolicy: Allow
-  schedule: "* * * * *"
-  jobTemplate:
-    spec:
-      activeDeadlineSeconds: 900
-      ttlSecondsAfterFinished: 86400
-      template:
-        spec:
-          containers:
-          - name: secret-ensurer
-            image: image-registry.openshift-image-registry.svc:5000/openshift/tools:latest
-            imagePullPolicy: Always
-            resources: {}                                                                                                                                                                 
-            terminationMessagePath: /dev/termination-log                                                                                                                                  
-            terminationMessagePolicy: File
-            command:
-            - /bin/bash
-            - -c
-            - |
-              #!/bin/bash
-
-              # Check first if we need to create the alternative root ca
-              CERTMAN_CA=$(oc get secret certman-root-ca --ignore-not-found)
-              if [[ -n $CERTMAN_CA ]]; then
-                echo "The certman-root-ca secret already exists, avoiding recreating"
-                exit 0
-              fi
-
-              # Check if root-ca exists, we can't create the additional secret without it
-              ROOT_CA=$(oc get secret root-ca --ignore-not-found)
-              if [[ -z $ROOT_CA ]]; then
-                echo "The root-ca does not exist, it is required to exist"
-                exit 0
-              fi
-
-              # Move to where the user has permissions
-              mkdir /tmp/certifcate && cd /tmp/certifcate
-
-              # Get the secret key and crt from root-ca
-              oc get secret root-ca -o json | jq -r '.data["ca.crt"]' | base64 --decode > ca.crt
-              oc get secret root-ca -o json | jq -r '.data["ca.key"]' | base64 --decode > ca.key
-
-              # Create TLS secret so that it is Cert Manager compatible
-              oc create secret tls certman-root-ca --key ca.key --cert ca.crt
-          dnsPolicy: ClusterFirst
-          restartPolicy: Never
-          schedulerName: default-scheduler
-          securityContext: {}
-          serviceAccount: metrics-forwarder-sa
-          serviceAccountName: metrics-forwarder-sa
-          terminationGracePeriodSeconds: 30
----
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
@@ -100,7 +7,7 @@ metadata:
   name: metrics-forwarder-ca-issuer
 spec:
   ca:
-    secretName: certman-root-ca
+    secretName: root-ca
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -202,7 +109,7 @@ data:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: metrics-forwarder 
+  name: metrics-forwarder
   annotations:
     package-operator.run/phase: deploy
 spec:

@@ -6,14 +6,6 @@ spec:
   scopes:
     - Namespaced
   phases:
-    - name: rbac
-      objects:
-      - object: {apiVersion: v1, kind: ServiceAccount}
-      - object: {apiVersion: rbac.authorization.k8s.io/v1, kind: Role}
-      - object: {apiVersion: rbac.authorization.k8s.io/v1, kind: RoleBinding}
-    - name: certman-root-ca
-      objects:
-      - object: {apiVersion: batch/v1, kind: CronJob}
     - name: certman-issuer
       objects:
       - object: {apiVersion: cert-manager.io/v1, kind: Issuer}
@@ -47,4 +39,4 @@ test:
       package:
         metadata:
           name: metrics-forwarder
-          namespace: ocm-staging-245j2uin9s8ekvpkgsgp1mvji0trt45j-ss-hp-0506
+          namespace: ocm-staging-24o19ba52km496nvegb629918l9gbnvu-bmeng-hcp
