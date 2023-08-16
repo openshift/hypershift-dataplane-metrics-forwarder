@@ -5,10 +5,6 @@ The dataplane metrics forwarder is a proxy that lives in each hosted control pla
 ## Deployment process
 
 The proxy is deployed using ACM policy. The ACM policy targets all management clusters and only HCP namespaces in those management clusters. It deploys a PKO package which deploys the resources the proxy needs. The resources it deploys are:
-- ServiceAccount
-- Role
-- RoleBinding
-- CronJob
 - Issuer
 - Certificate
 - ConfigMap
@@ -16,18 +12,11 @@ The proxy is deployed using ACM policy. The ACM policy targets all management cl
 - Service
 - Route
 
-Additionally, the CMO on the dataplane is configured using another policy that only targets hosted clusters.
+Additionally, the CMO on the dataplane is configured using another policy that only targets hosted clusters. There are two versios of the policy.
+- `metrics-forwarder-config`
+- `metrics-forwarder-config-non-uwm`
 
-## Proxy initialization process
-
-The proxy needs to be initialized to work properly. This phase might not be needed later if the root-ca contains certificates that are compatible with [cert-manager](https://cert-manager.io/).
-Initially, PKO package deploys 4 resources:
-- ServiceAccount
-- Role
-- RoleBinding
-- CronJob
-
-This CronJob mainly recreates the root-ca in the HCP with names that are compatible with cert-manager.
+`metrics-forwarder-config` is applied by default unless a `ManagedCluster` has the label `ext-managed.openshift.io/uwm-disabled` set to `true`
 
 ## Testing
 
