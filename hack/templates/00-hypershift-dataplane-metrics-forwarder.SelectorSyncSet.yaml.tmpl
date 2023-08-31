@@ -304,105 +304,129 @@ objects:
                           namespace: openshift-monitoring
                         data:
                           config.yaml: |
-                           prometheusK8s:
-                             nodeSelector:
-                               node-role.kubernetes.io/worker: ""
-                             topologySpreadConstraints:
-                                - maxSkew: 1
-                                  topologyKey: topology.kubernetes.io/zone
-                                  whenUnsatisfiable: ScheduleAnyway
-                                  labelSelector:
-                                    matchLabels:
-                                      app: prometheus
-                                  nodeAffinityPolicy: Honor
-                                  nodeTaintsPolicy: Honor
-                                - maxSkew: 1
-                                  topologyKey: node-role.kubernetes.io/infra
-                                  whenUnsatisfiable: ScheduleAnyway
-                                  labelSelector:
-                                    matchLabels:
-                                      app: prometheus
-                                  nodeAffinityPolicy: Honor
-                                  nodeTaintsPolicy: Honor
-                             tolerations:
-                               - effect: NoSchedule
-                                 key: node-role.kubernetes.io/infra
-                                 operator: Exists
-                             retention: 1d
-                           alertmanagerMain:
-                             nodeSelector:
-                               node-role.kubernetes.io/worker: ""
-                             topologySpreadConstraints:
-                                - maxSkew: 1
-                                  topologyKey: topology.kubernetes.io/zone
-                                  whenUnsatisfiable: ScheduleAnyway
-                                  labelSelector:
-                                    matchLabels:
-                                      app: prometheus
-                                  nodeAffinityPolicy: Honor
-                                  nodeTaintsPolicy: Honor
-                                - maxSkew: 1
-                                  topologyKey: node-role.kubernetes.io/infra
-                                  whenUnsatisfiable: ScheduleAnyway
-                                  labelSelector:
-                                    matchLabels:
-                                      app: prometheus
-                                  nodeAffinityPolicy: Honor
-                                  nodeTaintsPolicy: Honor
-                             tolerations:
-                               - effect: NoSchedule
-                                 key: node-role.kubernetes.io/infra
-                                 operator: Exists
-                             volumeClaimTemplate:
-                               metadata:
-                                 name: alertmanager-data
-                               spec:
-                                 resources:
-                                   requests:
-                                     storage: 10Gi
-                           telemeterClient:
-                             nodeSelector:
-                               node-role.kubernetes.io/worker: ""
-                             tolerations:
-                               - effect: NoSchedule
-                                 key: node-role.kubernetes.io/infra
-                                 operator: Exists
-                             telemeterServerURL: ${TELEMETER_SERVER_URL}
-                           prometheusOperator:
-                             nodeSelector:
-                               node-role.kubernetes.io/worker: ""
-                             tolerations:
-                               - effect: NoSchedule
-                                 key: node-role.kubernetes.io/infra
-                                 operator: Exists
-                           k8sPrometheusAdapter:
-                             nodeSelector:
-                               node-role.kubernetes.io/worker: ""
-                             tolerations:
-                               - effect: NoSchedule
-                                 key: node-role.kubernetes.io/infra
-                                 operator: Exists
-                           kubeStateMetrics:
-                             nodeSelector:
-                               node-role.kubernetes.io/worker: ""
-                             tolerations:
-                               - effect: NoSchedule
-                                 key: node-role.kubernetes.io/infra
-                                 operator: Exists
-                           openshiftStateMetrics:
-                             nodeSelector:
-                               node-role.kubernetes.io/worker: ""
-                             tolerations:
-                               - effect: NoSchedule
-                                 key: node-role.kubernetes.io/infra
-                                 operator: Exists
-                           thanosQuerier:
-                             nodeSelector:
-                               node-role.kubernetes.io/worker: ""
-                             tolerations:
-                               - effect: NoSchedule
-                                 key: node-role.kubernetes.io/infra
-                                 operator: Exists
+                            enableUserWorkload: false
+                            prometheusK8s:
+                              externalLabels:
+                                source: "DP"
+                              replicas: 2
+                              remoteWrite:
+                                - url: https://metrics-forwarder.apps.{{ range $res := ((lookup "config.openshift.io/v1" "Infrastructure" "default" "cluster").status.platformStatus.aws.resourceTags) }}{{ if eq $res.key "api.openshift.com/name" }}{{ $res.value }}{{ end }}{{ end }}.hypershift.local
+                                  remoteTimeout: 30s
+                                  writeRelabelConfigs:
+                                  - sourceLabels: [__tmp_openshift_cluster_id__]
+                                    targetLabel: _id
+                                    action: replace
+                                  - sourceLabels: [__name__]
+                                    regex: '(apiserver_request_duration_seconds_bucket|apiserver_request_duration_seconds_count|apiserver_request_total|kube_node_labels|cluster:capacity_cpu_cores:sum|cluster:capacity_memory_bytes:sum|cluster:memory_usage_bytes:sum|cluster:node_instance_type_count:sum|cluster:virt_platform_nodes:sum|console_url|kube_node_spec_unschedulable|kube_node_status_condition|node_role_os_version_machine:cpu_capacity_cores:sum|node_role_os_version_machine:cpu_capacity_cores:sum|node_role_os_version_machine:cpu_capacity_sockets:sum|up|probe_success)'
+                                    action: keep
+                                  queueConfig:
+                                    capacity: 10000
+                                    maxShards: 500
+                                    minShards: 1
+                                    maxSamplesPerSend: 2000
+                                    batchSendDeadline: 60s
+                                    minBackoff: 30ms
+                                    maxBackoff: 30s
+                                  tlsConfig:
+                                    insecureSkipVerify: true
+                              nodeSelector:
+                                node-role.kubernetes.io/worker: ""
+                              topologySpreadConstraints:
+                                 - maxSkew: 1
+                                   topologyKey: topology.kubernetes.io/zone
+                                   whenUnsatisfiable: ScheduleAnyway
+                                   labelSelector:
+                                     matchLabels:
+                                       app: prometheus
+                                   nodeAffinityPolicy: Honor
+                                   nodeTaintsPolicy: Honor
+                                 - maxSkew: 1
+                                   topologyKey: node-role.kubernetes.io/infra
+                                   whenUnsatisfiable: ScheduleAnyway
+                                   labelSelector:
+                                     matchLabels:
+                                       app: prometheus
+                                   nodeAffinityPolicy: Honor
+                                   nodeTaintsPolicy: Honor
+                              tolerations:
+                                - effect: NoSchedule
+                                  key: node-role.kubernetes.io/infra
+                                  operator: Exists
+                              retention: 1d
+                            alertmanagerMain:
+                              nodeSelector:
+                                node-role.kubernetes.io/worker: ""
+                              topologySpreadConstraints:
+                                 - maxSkew: 1
+                                   topologyKey: topology.kubernetes.io/zone
+                                   whenUnsatisfiable: ScheduleAnyway
+                                   labelSelector:
+                                     matchLabels:
+                                       app: prometheus
+                                   nodeAffinityPolicy: Honor
+                                   nodeTaintsPolicy: Honor
+                                 - maxSkew: 1
+                                   topologyKey: node-role.kubernetes.io/infra
+                                   whenUnsatisfiable: ScheduleAnyway
+                                   labelSelector:
+                                     matchLabels:
+                                       app: prometheus
+                                   nodeAffinityPolicy: Honor
+                                   nodeTaintsPolicy: Honor
+                              tolerations:
+                                - effect: NoSchedule
+                                  key: node-role.kubernetes.io/infra
+                                  operator: Exists
+                              volumeClaimTemplate:
+                                metadata:
+                                  name: alertmanager-data
+                                spec:
+                                  resources:
+                                    requests:
+                                      storage: 10Gi
+                            telemeterClient:
+                              nodeSelector:
+                                node-role.kubernetes.io/worker: ""
+                              tolerations:
+                                - effect: NoSchedule
+                                  key: node-role.kubernetes.io/infra
+                                  operator: Exists
+                              telemeterServerURL: ${TELEMETER_SERVER_URL}
+                            prometheusOperator:
+                              nodeSelector:
+                                node-role.kubernetes.io/worker: ""
+                              tolerations:
+                                - effect: NoSchedule
+                                  key: node-role.kubernetes.io/infra
+                                  operator: Exists
+                            k8sPrometheusAdapter:
+                              nodeSelector:
+                                node-role.kubernetes.io/worker: ""
+                              tolerations:
+                                - effect: NoSchedule
+                                  key: node-role.kubernetes.io/infra
+                                  operator: Exists
+                            kubeStateMetrics:
+                              nodeSelector:
+                                node-role.kubernetes.io/worker: ""
+                              tolerations:
+                                - effect: NoSchedule
+                                  key: node-role.kubernetes.io/infra
+                                  operator: Exists
+                            openshiftStateMetrics:
+                              nodeSelector:
+                                node-role.kubernetes.io/worker: ""
+                              tolerations:
+                                - effect: NoSchedule
+                                  key: node-role.kubernetes.io/infra
+                                  operator: Exists
+                            thanosQuerier:
+                              nodeSelector:
+                                node-role.kubernetes.io/worker: ""
+                              tolerations:
+                                - effect: NoSchedule
+                                  key: node-role.kubernetes.io/infra
+                                  operator: Exists
         - apiVersion: apps.open-cluster-management.io/v1
           kind: PlacementRule
           metadata:
