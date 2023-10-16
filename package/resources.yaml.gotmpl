@@ -212,6 +212,9 @@ spec:
           key: hypershift.openshift.io/cluster
           operator: Equal
           value: '{{.package.metadata.namespace}}'
+        - effect: NoSchedule
+          key: hypershift.openshift.io/request-serving-component
+          operator: Exists
       volumes:
         - name: nginx-config
           configMap:
