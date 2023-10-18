@@ -155,22 +155,22 @@ spec:
       affinity:
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - preferece:
-              weight: 50
+          - weight: 50
+            preference:
               matchExpressions:
               - key: hypershift.openshift.io/hosted-control-plane
                 operator: In
                 values:
                 - "true"
-          - preference:
-              weight: 200
+          - weight: 200
+            preference:
               matchExpressions:
               - key: hypershift.openshift.io/request-serving-component
                 operator: In
                 values:
                 - "true"
-          - preference:
-              weight: 100
+          - weight: 100
+            preference:
               matchExpressions:
               - key: hypershift.openshift.io/cluster
                 operator: In
