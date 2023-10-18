@@ -155,20 +155,27 @@ spec:
       affinity:
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - preference:
+          - preferece:
+              weight: 50
               matchExpressions:
               - key: hypershift.openshift.io/hosted-control-plane
                 operator: In
                 values:
                 - "true"
-            weight: 50
           - preference:
+              weight: 200
+              matchExpressions:
+              - key: hypershift.openshift.io/request-serving-component
+                operator: In
+                values:
+                - "true"
+          - preference:
+              weight: 100
               matchExpressions:
               - key: hypershift.openshift.io/cluster
                 operator: In
                 values:
                 - '{{.package.metadata.namespace}}'
-            weight: 100
         podAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
           - podAffinityTerm:
@@ -205,6 +212,9 @@ spec:
           key: hypershift.openshift.io/cluster
           operator: Equal
           value: '{{.package.metadata.namespace}}'
+        - effect: NoSchedule
+          key: hypershift.openshift.io/request-serving-component
+          operator: Exists
       volumes:
         - name: nginx-config
           configMap:
