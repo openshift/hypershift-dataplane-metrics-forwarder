@@ -162,14 +162,14 @@ spec:
                 operator: In
                 values:
                 - "true"
-          - weight: 200
+          - weight: 100
             preference:
               matchExpressions:
               - key: hypershift.openshift.io/request-serving-component
                 operator: In
                 values:
                 - "true"
-          - weight: 100
+          - weight: 70
             preference:
               matchExpressions:
               - key: hypershift.openshift.io/cluster
