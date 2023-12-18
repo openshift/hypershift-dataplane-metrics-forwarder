@@ -151,14 +151,6 @@ objects:
                                       insecureSkipVerify: true
                                 nodeSelector:
                                   node-role.kubernetes.io/worker: ""
-                                affinity:
-                                  nodeAffinity:
-                                    preferredDuringSchedulingIgnoredDuringExecution:
-                                      - preference:
-                                          matchExpressions:
-                                            - key: node-role.kubernetes.io/infra
-                                              operator: Exists
-                                        weight: 1
                                 topologySpreadConstraints:
                                   - maxSkew: 1
                                     topologyKey: topology.kubernetes.io/zone
@@ -184,14 +176,6 @@ objects:
                               alertmanagerMain:
                                 nodeSelector:
                                   node-role.kubernetes.io/worker: ""
-                                affinity:
-                                  nodeAffinity:
-                                    preferredDuringSchedulingIgnoredDuringExecution:
-                                      - preference:
-                                          matchExpressions:
-                                            - key: node-role.kubernetes.io/infra
-                                              operator: Exists
-                                        weight: 1
                                 topologySpreadConstraints:
                                   - maxSkew: 1
                                     topologyKey: topology.kubernetes.io/zone
@@ -339,14 +323,6 @@ objects:
                                       insecureSkipVerify: true
                                 nodeSelector:
                                   node-role.kubernetes.io/worker: ""
-                                affinity:
-                                  nodeAffinity:
-                                    preferredDuringSchedulingIgnoredDuringExecution:
-                                      - preference:
-                                          matchExpressions:
-                                            - key: node-role.kubernetes.io/infra
-                                              operator: Exists
-                                        weight: 1
                                 topologySpreadConstraints:
                                   - maxSkew: 1
                                     topologyKey: topology.kubernetes.io/zone
@@ -364,14 +340,6 @@ objects:
                               alertmanagerMain:
                                 nodeSelector:
                                   node-role.kubernetes.io/worker: ""
-                                affinity:
-                                  nodeAffinity:
-                                    preferredDuringSchedulingIgnoredDuringExecution:
-                                      - preference:
-                                          matchExpressions:
-                                            - key: node-role.kubernetes.io/infra
-                                              operator: Exists
-                                        weight: 1
                                 topologySpreadConstraints:
                                   - maxSkew: 1
                                     topologyKey: topology.kubernetes.io/zone
