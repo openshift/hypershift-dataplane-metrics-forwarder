@@ -160,6 +160,14 @@ objects:
                                         app: prometheus
                                     nodeAffinityPolicy: Honor
                                     nodeTaintsPolicy: Honor
+                                  - maxSkew: 2
+                                    topologyKey: node-role.kubernetes.io/infra
+                                    whenUnsatisfiable: ScheduleAnyway
+                                    labelSelector:
+                                      matchLabels:
+                                        app: prometheus
+                                    nodeAffinityPolicy: Honor
+                                    nodeTaintsPolicy: Honor
                                 tolerations:
                                   - effect: NoSchedule
                                     key: node-role.kubernetes.io/infra
@@ -179,6 +187,14 @@ objects:
                                 topologySpreadConstraints:
                                   - maxSkew: 1
                                     topologyKey: topology.kubernetes.io/zone
+                                    whenUnsatisfiable: ScheduleAnyway
+                                    labelSelector:
+                                      matchLabels:
+                                        app: prometheus
+                                    nodeAffinityPolicy: Honor
+                                    nodeTaintsPolicy: Honor
+                                  - maxSkew: 2
+                                    topologyKey: node-role.kubernetes.io/infra
                                     whenUnsatisfiable: ScheduleAnyway
                                     labelSelector:
                                       matchLabels:
@@ -332,6 +348,14 @@ objects:
                                         app: prometheus
                                     nodeAffinityPolicy: Honor
                                     nodeTaintsPolicy: Honor
+                                  - maxSkew: 2
+                                    topologyKey: node-role.kubernetes.io/infra
+                                    whenUnsatisfiable: ScheduleAnyway
+                                    labelSelector:
+                                      matchLabels:
+                                        app: prometheus
+                                    nodeAffinityPolicy: Honor
+                                    nodeTaintsPolicy: Honor
                                 tolerations:
                                   - effect: NoSchedule
                                     key: node-role.kubernetes.io/infra
@@ -343,6 +367,14 @@ objects:
                                 topologySpreadConstraints:
                                   - maxSkew: 1
                                     topologyKey: topology.kubernetes.io/zone
+                                    whenUnsatisfiable: ScheduleAnyway
+                                    labelSelector:
+                                      matchLabels:
+                                        app: prometheus
+                                    nodeAffinityPolicy: Honor
+                                    nodeTaintsPolicy: Honor
+                                  - maxSkew: 2
+                                    topologyKey: node-role.kubernetes.io/infra
                                     whenUnsatisfiable: ScheduleAnyway
                                     labelSelector:
                                       matchLabels:
