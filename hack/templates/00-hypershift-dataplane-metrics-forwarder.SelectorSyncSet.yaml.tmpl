@@ -58,9 +58,6 @@ objects:
             name: placement-metrics-forwarder
             namespace: openshift-acm-policies
           spec:
-            clusterConditions:
-              - status: "True"
-                type: ManagedClusterConditionAvailable
             clusterSelector:
               matchExpressions:
                 - key: hypershift.open-cluster-management.io/management-cluster
@@ -246,9 +243,6 @@ objects:
             name: placement-metrics-forwarder-config
             namespace: openshift-acm-policies
           spec:
-            clusterConditions:
-              - status: "True"
-                type: ManagedClusterConditionAvailable
             clusterSelector:
               matchExpressions:
                 - key: hypershift.open-cluster-management.io/hosted-cluster
@@ -427,9 +421,6 @@ objects:
             name: placement-metrics-forwarder-config-non-uwm
             namespace: openshift-acm-policies
           spec:
-            clusterConditions:
-              - status: "True"
-                type: ManagedClusterConditionAvailable
             clusterSelector:
               matchExpressions:
                 - key: hypershift.open-cluster-management.io/hosted-cluster
