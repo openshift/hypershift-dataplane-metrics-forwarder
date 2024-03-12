@@ -7,6 +7,8 @@ parameters:
     required: true
   - name: IMAGE_DIGEST
     required: true
+  - name: TELEMETER_SERVER_URL
+    required: true
 objects:
   - apiVersion: hive.openshift.io/v1
     kind: SelectorSyncSet
@@ -201,7 +203,13 @@ objects:
                                     key: node-role.kubernetes.io/infra
                                     operator: Exists
                               telemeterClient:
-                                enabled: false
+                                nodeSelector:
+                                  node-role.kubernetes.io/worker: ""
+                                tolerations:
+                                  - effect: NoSchedule
+                                    key: node-role.kubernetes.io/infra
+                                    operator: Exists
+                                telemeterServerURL: ${TELEMETER_SERVER_URL}
                               prometheusOperator:
                                 nodeSelector:
                                   node-role.kubernetes.io/worker: ""
@@ -379,7 +387,13 @@ objects:
                                       requests:
                                         storage: 10Gi
                               telemeterClient:
-                                enabled: false
+                                nodeSelector:
+                                  node-role.kubernetes.io/worker: ""
+                                tolerations:
+                                  - effect: NoSchedule
+                                    key: node-role.kubernetes.io/infra
+                                    operator: Exists
+                                telemeterServerURL: ${TELEMETER_SERVER_URL}
                               prometheusOperator:
                                 nodeSelector:
                                   node-role.kubernetes.io/worker: ""
