@@ -127,7 +127,7 @@ objects:
                                   source: "DP"
                                 replicas: 2
                                 remoteWrite:
-                                  - url: https://metrics-forwarder.apps.{{ range $res := ((lookup "config.openshift.io/v1" "Infrastructure" "default" "cluster").status.platformStatus.aws.resourceTags) }}{{ if eq $res.key "api.openshift.com/name" }}{{ $res.value }}{{ end }}{{ end }}.hypershift.local
+                                  - url: {{ ( trimAll ":443" (( lookup "config.openshift.io/v1" "Infrastructure" "default" "cluster").status.apiServerInternalURI )) | replace "//api" "//metrics-forwarder.apps" }}
                                     remoteTimeout: 30s
                                     writeRelabelConfigs:
                                     - sourceLabels: [__tmp_openshift_cluster_id__]
@@ -312,7 +312,7 @@ objects:
                                   source: "DP"
                                 replicas: 2
                                 remoteWrite:
-                                  - url: https://metrics-forwarder.apps.{{ range $res := ((lookup "config.openshift.io/v1" "Infrastructure" "default" "cluster").status.platformStatus.aws.resourceTags) }}{{ if eq $res.key "api.openshift.com/name" }}{{ $res.value }}{{ end }}{{ end }}.hypershift.local
+                                  - url: {{ ( trimAll ":443" (( lookup "config.openshift.io/v1" "Infrastructure" "default" "cluster").status.apiServerInternalURI )) | replace "//api" "//metrics-forwarder.apps" }}
                                     remoteTimeout: 30s
                                     writeRelabelConfigs:
                                     - sourceLabels: [__tmp_openshift_cluster_id__]
