@@ -1,7 +1,6 @@
 reviewers:
   - wanghaoran1988
   - feichashao
-  - supreeth7
   - MitaliBhalla
   - Tafhim
   - bmeng
@@ -9,7 +8,6 @@ reviewers:
 approvers:
   - wanghaoran1988
   - feichashao
-  - supreeth7
   - bmeng
   - Tafhim
   - srep-team-leads
