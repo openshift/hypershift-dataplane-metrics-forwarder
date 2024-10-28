@@ -125,7 +125,6 @@ objects:
                               prometheusK8s:
                                 externalLabels:
                                   source: "DP"
-                                replicas: 2
                                 remoteWrite:
                                   - url: {{ ( trimAll ":443" (( lookup "config.openshift.io/v1" "Infrastructure" "default" "cluster").status.apiServerInternalURI )) | replace "//api" "//metrics-forwarder.apps" }}
                                     remoteTimeout: 30s
