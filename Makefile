@@ -33,10 +33,10 @@ skopeo-push:
 	fi
 	# QUAY_USER and QUAY_TOKEN are supplied as env vars
 	skopeo copy --dest-creds "${QUAY_USER}:${QUAY_TOKEN}" \
-		"docker-daemon:${IMG}:${IMAGETAG}" \
+		"containers-storage:${IMG}:${IMAGETAG}" \
 		"docker://${IMG}:latest"
 	skopeo copy --dest-creds "${QUAY_USER}:${QUAY_TOKEN}" \
-		"docker-daemon:${IMG}:${IMAGETAG}" \
+		"containers-storage:${IMG}:${IMAGETAG}" \
 		"docker://${IMG}:${IMAGETAG}"
 
 .PHONY: push-image
