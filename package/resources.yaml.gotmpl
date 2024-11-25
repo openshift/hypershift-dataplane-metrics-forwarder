@@ -154,6 +154,14 @@ spec:
     spec:
       affinity:
         nodeAffinity:
+	  requiredDuringSchedulingIgnoredDuringExecution:
+          # Enforce scheduling on nodes with the correct hypershift.openshift.io/cluster label
+          nodeSelectorTerms:
+	  - matchExpressions:
+            - key: hypershift.openshift.io/cluster
+	      operator: In
+	      values:
+	      - '{{.package.metadata.namespace}}'
           preferredDuringSchedulingIgnoredDuringExecution:
           - weight: 50
             preference:
@@ -169,13 +177,12 @@ spec:
                 operator: In
                 values:
                 - "true"
-          - weight: 70
-            preference:
-              matchExpressions:
-              - key: hypershift.openshift.io/cluster
-                operator: In
-                values:
-                - '{{.package.metadata.namespace}}'
+          # Fallback preference to any worker node (for cases where labels are missing)
+	  - weight: 30
+	    preference:
+	      matchExpressions:
+	      - key: node-role.kubernetes.io/worker
+		operator: Exists
         podAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
           - podAffinityTerm:
