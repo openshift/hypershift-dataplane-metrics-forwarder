@@ -22,8 +22,8 @@ spec:
     labels:
       app: metrics-forwarder
 
-  duration: 25960h 
-  renewBefore: 360h # 15d
+  duration: 25960h
+  renewBefore: 360h  # 15d
   subject:
     organizations:
       - openshift
@@ -114,25 +114,25 @@ metadata:
     package-operator.run/phase: deploy
 spec:
   egress:
-  - ports:
-    - port: 5353
-      protocol: UDP
-    - port: 5353
-      protocol: TCP
-    to:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: openshift-dns
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: openshift-observability-operator
-      podSelector: {}
+    - ports:
+        - port: 5353
+          protocol: UDP
+        - port: 5353
+          protocol: TCP
+      to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: openshift-dns
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: openshift-observability-operator
+          podSelector: {}
   podSelector:
     matchLabels:
       app: metrics-forwarder
   policyTypes:
-  - Egress
+    - Egress
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -154,56 +154,57 @@ spec:
     spec:
       affinity:
         nodeAffinity:
-	  requiredDuringSchedulingIgnoredDuringExecution:
-          # Enforce scheduling on nodes with the correct hypershift.openshift.io/cluster label
+          requiredDuringSchedulingIgnoredDuringExecution: null
           nodeSelectorTerms:
-	  - matchExpressions:
-            - key: hypershift.openshift.io/cluster
-	      operator: In
-	      values:
-	      - '{{.package.metadata.namespace}}'
+            - matchExpressions:
+                - key: hypershift.openshift.io/cluster
+                  operator: In
+                  values:
+                    - '{{.package.metadata.namespace}}'
           preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 50
-            preference:
-              matchExpressions:
-              - key: hypershift.openshift.io/control-plane
-                operator: In
-                values:
-                - "true"
-          - weight: 100
-            preference:
-              matchExpressions:
-              - key: hypershift.openshift.io/request-serving-component
-                operator: In
-                values:
-                - "true"
-          # Fallback preference to any worker node (for cases where labels are missing)
-	  - weight: 30
-	    preference:
-	      matchExpressions:
-	      - key: node-role.kubernetes.io/worker
-		operator: Exists
+            - weight: 50
+              preference:
+                matchExpressions:
+                  - key: hypershift.openshift.io/control-plane
+                    operator: In
+                    values:
+                      - 'true'
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: hypershift.openshift.io/request-serving-component
+                    operator: In
+                    values:
+                      - 'true'
+            - weight: 30
+              preference:
+                matchExpressions:
+                  - key: node-role.kubernetes.io/worker
+                    operator: Exists
         podAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  hypershift.openshift.io/hosted-control-plane: '{{.package.metadata.namespace}}'
-              topologyKey: kubernetes.io/hostname
-            weight: 100
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    hypershift.openshift.io/hosted-control-plane: '{{.package.metadata.namespace}}'
+                topologyKey: kubernetes.io/hostname
+              weight: 100
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchLabels:
-                app: metrics-forwarder
-            topologyKey: topology.kubernetes.io/zone
+            - labelSelector:
+                matchLabels:
+                  app: metrics-forwarder
+              topologyKey: topology.kubernetes.io/zone
       automountServiceAccountToken: false
       containers:
         - name: nginx
           image: registry.access.redhat.com/ubi8/nginx-120
-          command: ["nginx", "-g", "daemon off;"]
+          command:
+            - nginx
+            - '-g'
+            - daemon off;
           ports:
-          - containerPort: 8001
+            - containerPort: 8001
           volumeMounts:
             - name: nginx-config
               mountPath: /etc/nginx/nginx.conf
@@ -214,7 +215,7 @@ spec:
         - effect: NoSchedule
           key: hypershift.openshift.io/control-plane
           operator: Equal
-          value: "true"
+          value: 'true'
         - effect: NoSchedule
           key: hypershift.openshift.io/cluster
           operator: Equal
@@ -222,7 +223,7 @@ spec:
         - effect: NoSchedule
           key: hypershift.openshift.io/request-serving-component
           operator: Equal
-          value: "true"
+          value: 'true'
       volumes:
         - name: nginx-config
           configMap:
@@ -243,10 +244,10 @@ spec:
   selector:
     app: metrics-forwarder
   ports:
-  - protocol: TCP
-    port: 8003
-    targetPort: 8003
-    name: nginx
+    - protocol: TCP
+      port: 8003
+      targetPort: 8003
+      name: nginx
 ---
 apiVersion: route.openshift.io/v1
 kind: Route
@@ -269,4 +270,3 @@ spec:
     name: metrics-forwarder
     weight: 100
   wildcardPolicy: None
-
