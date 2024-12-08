@@ -154,13 +154,13 @@ spec:
     spec:
       affinity:
         nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution: null
-          nodeSelectorTerms:
-            - matchExpressions:
-                - key: hypershift.openshift.io/cluster
-                  operator: In
-                  values:
-                    - '{{.package.metadata.namespace}}'
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: hypershift.openshift.io/cluster
+                    operator: In
+                    values:
+                      - '{{.package.metadata.namespace}}'
           preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 50
               preference:
