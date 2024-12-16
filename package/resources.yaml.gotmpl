@@ -159,14 +159,12 @@ spec:
               - matchExpressions:
                   - key: node-role.kubernetes.io/worker
                     operator: Exists
-
 	      # Term 3: Additional fallback to control-plane-labeled nodes
 	      - matchExpressions:
 	          - key: hypershift.openshift.io/control-plane
 	            operator: In
 		    values:
 	              - 'true'	
-
           preferredDuringSchedulingIgnoredDuringExecution:
             # Strong preference for nodes with the correct cluster label
             - weight: 100
