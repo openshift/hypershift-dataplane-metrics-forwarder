@@ -16,14 +16,13 @@ metadata:
     package-operator.run/phase: certman-cert
   name: metrics-forwarder-cert
 spec:
-  # Secret names are always required.
   secretName: metrics-forwarder-secret
   secretTemplate:
     labels:
       app: metrics-forwarder
 
-  duration: 25960h 
-  renewBefore: 360h # 15d
+  duration: 25960h
+  renewBefore: 360h
   subject:
     organizations:
       - openshift
@@ -35,18 +34,12 @@ spec:
   usages:
     - server auth
     - client auth
-  # At least one of a DNS Name, URI, or IP address is required.
   dnsNames:
-    - apps.{{ with $x := .package.metadata.namespace }}{{ (splitn "-" 4 $x)._3 }}{{end}}.hypershift.local
+    - apps.{{ with $x := .package.metadata.namespace }}{{ (splitn "-" 4 $x)._3 }}{{ end }}.hypershift.local
     - localhost
-  # Issuer references are always required.
   issuerRef:
     name: metrics-forwarder-ca-issuer
-    # We can reference ClusterIssuers by changing the kind here.
-    # The default value is Issuer (i.e. a locally namespaced Issuer)
     kind: Issuer
-    # This is optional since cert-manager will default to this value however
-    # if you are using an external issuer, change this to that issuer group.
     group: cert-manager.io
 ---
 apiVersion: v1
@@ -86,7 +79,7 @@ data:
         listen 8001;
         listen 8003 ssl;
 
-        server_name metrics-forwarder.apps.{{ with $x := .package.metadata.namespace }}{{ (splitn "-" 4 $x)._3 }}{{end}}.hypershift.local;
+        server_name metrics-forwarder.apps.{{ with $x := .package.metadata.namespace }}{{ (splitn "-" 4 $x)._3 }}{{ end }}.hypershift.local;
 
         ssl_certificate /etc/nginx/cert/tls.crt;
         ssl_certificate_key  /etc/nginx/cert/tls.key;
@@ -114,25 +107,25 @@ metadata:
     package-operator.run/phase: deploy
 spec:
   egress:
-  - ports:
-    - port: 5353
-      protocol: UDP
-    - port: 5353
-      protocol: TCP
-    to:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: openshift-dns
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: openshift-observability-operator
-      podSelector: {}
+    - ports:
+        - port: 5353
+          protocol: UDP
+        - port: 5353
+          protocol: TCP
+      to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: openshift-dns
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: openshift-observability-operator
+          podSelector: {}
   podSelector:
     matchLabels:
       app: metrics-forwarder
   policyTypes:
-  - Egress
+    - Egress
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -154,49 +147,79 @@ spec:
     spec:
       affinity:
         nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              # Term 1: Try to match the cluster label if present
+              - matchExpressions:
+                  - key: hypershift.openshift.io/cluster
+                    operator: In
+                    values:
+                      - '{{.package.metadata.namespace}}'
+              # Term 2: Fallback to worker nodes if cluster label is missing
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/worker
+                    operator: Exists
+	      # Term 3: Additional fallback to control-plane-labeled nodes
+	      - matchExpressions:
+	          - key: hypershift.openshift.io/control-plane
+	            operator: In
+		    values:
+	              - 'true'	
           preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 50
-            preference:
-              matchExpressions:
-              - key: hypershift.openshift.io/control-plane
-                operator: In
-                values:
-                - "true"
-          - weight: 100
-            preference:
-              matchExpressions:
-              - key: hypershift.openshift.io/request-serving-component
-                operator: In
-                values:
-                - "true"
-          - weight: 70
-            preference:
-              matchExpressions:
-              - key: hypershift.openshift.io/cluster
-                operator: In
-                values:
-                - '{{.package.metadata.namespace}}'
+            # Strong preference for nodes with the correct cluster label
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: hypershift.openshift.io/cluster
+                    operator: In
+                    values:
+                      - '{{.package.metadata.namespace}}'
+            - weight: 90
+              preference:
+                matchExpressions:
+                  - key: hypershift.openshift.io/request-serving-component
+                    operator: In
+                    values:
+                      - 'true'
+            - weight: 80
+              preference:
+                matchExpressions:
+                  - key: hypershift.openshift.io/control-plane
+                    operator: In
+                    values:
+                      - 'true'
+            - weight: 70
+              preference:
+                matchExpressions:
+                  - key: node-role.kubernetes.io/worker
+                    operator: Exists
+
         podAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
-              labelSelector:
-                matchLabels:
-                  hypershift.openshift.io/hosted-control-plane: '{{.package.metadata.namespace}}'
-              topologyKey: kubernetes.io/hostname
-            weight: 100
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    hypershift.openshift.io/hosted-control-plane: '{{.package.metadata.namespace}}'
+                topologyKey: kubernetes.io/hostname
+              weight: 100
+
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchLabels:
-                app: metrics-forwarder
-            topologyKey: topology.kubernetes.io/zone
+            - labelSelector:
+                matchLabels:
+                  app: metrics-forwarder
+              topologyKey: topology.kubernetes.io/zone
+
       automountServiceAccountToken: false
       containers:
         - name: nginx
           image: registry.access.redhat.com/ubi8/nginx-120
-          command: ["nginx", "-g", "daemon off;"]
+          command:
+            - nginx
+            - '-g'
+            - daemon off;
           ports:
-          - containerPort: 8001
+            - containerPort: 8001
           volumeMounts:
             - name: nginx-config
               mountPath: /etc/nginx/nginx.conf
@@ -207,7 +230,7 @@ spec:
         - effect: NoSchedule
           key: hypershift.openshift.io/control-plane
           operator: Equal
-          value: "true"
+          value: 'true'
         - effect: NoSchedule
           key: hypershift.openshift.io/cluster
           operator: Equal
@@ -215,7 +238,7 @@ spec:
         - effect: NoSchedule
           key: hypershift.openshift.io/request-serving-component
           operator: Equal
-          value: "true"
+          value: 'true'
       volumes:
         - name: nginx-config
           configMap:
@@ -236,10 +259,10 @@ spec:
   selector:
     app: metrics-forwarder
   ports:
-  - protocol: TCP
-    port: 8003
-    targetPort: 8003
-    name: nginx
+    - protocol: TCP
+      port: 8003
+      targetPort: 8003
+      name: nginx
 ---
 apiVersion: route.openshift.io/v1
 kind: Route
@@ -251,7 +274,7 @@ metadata:
     package-operator.run/phase: expose
   name: metrics-forwarder
 spec:
-  host: metrics-forwarder.apps.{{ with $x := .package.metadata.namespace }}{{ (splitn "-" 4 $x)._3 }}{{end}}.hypershift.local
+  host: metrics-forwarder.apps.{{ with $x := .package.metadata.namespace }}{{ (splitn "-" 4 $x)._3 }}{{ end }}.hypershift.local
   tls:
     insecureEdgeTerminationPolicy: None
     termination: passthrough
@@ -262,4 +285,3 @@ spec:
     name: metrics-forwarder
     weight: 100
   wildcardPolicy: None
-
