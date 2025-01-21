@@ -20,7 +20,6 @@ spec:
   secretTemplate:
     labels:
       app: metrics-forwarder
-
   duration: 25960h
   renewBefore: 360h
   subject:
@@ -84,17 +83,16 @@ data:
         ssl_certificate /etc/nginx/cert/tls.crt;
         ssl_certificate_key  /etc/nginx/cert/tls.key;
 
-
         location /healthz {
           return 200;
         }
 
         location / {
           proxy_pass http://hypershift-monitoring-stack-prometheus.openshift-observability-operator.svc.cluster.local:9090/api/v1/write;
-            proxy_buffering off;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-Host $host;
-            proxy_set_header X-Forwarded-Port $server_port;
+          proxy_buffering off;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-Host $host;
+          proxy_set_header X-Forwarded-Port $server_port;
         }
       }
     }
@@ -149,18 +147,16 @@ spec:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-              # Term: Try to match both the required cluster labels if present
               - matchExpressions:
                   - key: hypershift.openshift.io/cluster
                     operator: In
                     values:
                       - '{{.package.metadata.namespace}}'
-		  - key: hypershift.openshift.io/request-serving-component
-            	    operator: In
+                  - key: hypershift.openshift.io/request-serving-component
+                    operator: In
                     values:
                       - 'true'
           preferredDuringSchedulingIgnoredDuringExecution:
-            # Preference for nodes with both required labels
             - weight: 100
               preference:
                 matchExpressions:
@@ -182,8 +178,8 @@ spec:
             - weight: 80
               preference:
                 matchExpressions:
-		  - key: hypershift.openshift.io/request-serving-component
-            	    operator: In
+                  - key: hypershift.openshift.io/request-serving-component
+                    operator: In
                     values:
                       - 'true'
             - weight: 70
@@ -198,7 +194,6 @@ spec:
                 matchExpressions:
                   - key: node-role.kubernetes.io/worker
                     operator: Exists
-
         podAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
             - podAffinityTerm:
@@ -207,14 +202,12 @@ spec:
                     hypershift.openshift.io/hosted-control-plane: '{{.package.metadata.namespace}}'
                 topologyKey: kubernetes.io/hostname
               weight: 100
-
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             - labelSelector:
                 matchLabels:
                   app: metrics-forwarder
               topologyKey: topology.kubernetes.io/zone
-
       automountServiceAccountToken: false
       containers:
         - name: nginx
@@ -273,7 +266,7 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   labels:
-    hypershift.openshift.io/hosted-control-plane: {{.package.metadata.namespace}}
+    hypershift.openshift.io/hosted-control-plane: '{{.package.metadata.namespace}}'
     hypershift.openshift.io/internal-route: "true"
   annotations:
     package-operator.run/phase: expose
