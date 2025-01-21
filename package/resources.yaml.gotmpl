@@ -149,24 +149,18 @@ spec:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-              # Term 1: Try to match the cluster label if present
+              # Term: Try to match both the cluster labels if present
               - matchExpressions:
                   - key: hypershift.openshift.io/cluster
                     operator: In
                     values:
                       - '{{.package.metadata.namespace}}'
-              # Term 2: Fallback to worker nodes if cluster label is missing
-              - matchExpressions:
-                  - key: node-role.kubernetes.io/worker
-                    operator: Exists
-	      # Term 3: Additional fallback to control-plane-labeled nodes
-	      - matchExpressions:
-	          - key: hypershift.openshift.io/control-plane
-	            operator: In
-		    values:
-	              - 'true'	
+		  - key: hypershift.openshift.io/request-serving-component
+            	    operator: In
+                    values:
+                      - 'true'
           preferredDuringSchedulingIgnoredDuringExecution:
-            # Strong preference for nodes with the correct cluster label
+            # Preference for nodes with the correct cluster label
             - weight: 100
               preference:
                 matchExpressions:
@@ -174,21 +168,22 @@ spec:
                     operator: In
                     values:
                       - '{{.package.metadata.namespace}}'
-            - weight: 90
+            # Preference for nodes with the request-serving-component label
+            - weight: 100
               preference:
                 matchExpressions:
                   - key: hypershift.openshift.io/request-serving-component
                     operator: In
                     values:
                       - 'true'
-            - weight: 80
+            - weight: 90
               preference:
                 matchExpressions:
                   - key: hypershift.openshift.io/control-plane
                     operator: In
                     values:
                       - 'true'
-            - weight: 70
+            - weight: 80
               preference:
                 matchExpressions:
                   - key: node-role.kubernetes.io/worker
