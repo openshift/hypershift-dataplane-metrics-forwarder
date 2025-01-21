@@ -149,7 +149,7 @@ spec:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-              # Term: Try to match both the cluster labels if present
+              # Term: Try to match both the required cluster labels if present
               - matchExpressions:
                   - key: hypershift.openshift.io/cluster
                     operator: In
@@ -160,7 +160,7 @@ spec:
                     values:
                       - 'true'
           preferredDuringSchedulingIgnoredDuringExecution:
-            # Preference for nodes with the correct cluster label
+            # Preference for nodes with both required labels
             - weight: 100
               preference:
                 matchExpressions:
@@ -168,10 +168,6 @@ spec:
                     operator: In
                     values:
                       - '{{.package.metadata.namespace}}'
-            # Preference for nodes with the request-serving-component label
-            - weight: 100
-              preference:
-                matchExpressions:
                   - key: hypershift.openshift.io/request-serving-component
                     operator: In
                     values:
@@ -179,11 +175,25 @@ spec:
             - weight: 90
               preference:
                 matchExpressions:
+                  - key: hypershift.openshift.io/cluster
+                    operator: In
+                    values:
+                      - '{{.package.metadata.namespace}}'
+            - weight: 80
+              preference:
+                matchExpressions:
+		  - key: hypershift.openshift.io/request-serving-component
+            	    operator: In
+                    values:
+                      - 'true'
+            - weight: 70
+              preference:
+                matchExpressions:
                   - key: hypershift.openshift.io/control-plane
                     operator: In
                     values:
                       - 'true'
-            - weight: 80
+            - weight: 60
               preference:
                 matchExpressions:
                   - key: node-role.kubernetes.io/worker
