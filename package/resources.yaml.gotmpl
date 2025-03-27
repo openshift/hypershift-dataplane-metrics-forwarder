@@ -34,7 +34,7 @@ spec:
     - server auth
     - client auth
   dnsNames:
-    - apps.{{ with $x := .package.metadata.namespace }}{{ (splitn "-" 4 $x)._3 }}{{ end }}.hypershift.local
+    - apps.{{ .environment.hyperShift.hostedCluster.metadata.name }}.hypershift.local
     - localhost
   issuerRef:
     name: metrics-forwarder-ca-issuer
@@ -78,7 +78,7 @@ data:
         listen 8001;
         listen 8003 ssl;
 
-        server_name metrics-forwarder.apps.{{ with $x := .package.metadata.namespace }}{{ (splitn "-" 4 $x)._3 }}{{ end }}.hypershift.local;
+        server_name metrics-forwarder.apps.{{ .environment.hyperShift.hostedCluster.metadata.name }}.hypershift.local;
 
         ssl_certificate /etc/nginx/cert/tls.crt;
         ssl_certificate_key  /etc/nginx/cert/tls.key;
@@ -151,7 +151,7 @@ spec:
                   - key: hypershift.openshift.io/cluster
                     operator: In
                     values:
-                      - '{{.package.metadata.namespace}}'
+                      - '{{ .environment.hyperShift.hostedCluster.hostedClusterNamespace }}'
           preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 100
               preference:
@@ -159,7 +159,7 @@ spec:
                   - key: hypershift.openshift.io/cluster
                     operator: In
                     values:
-                      - '{{.package.metadata.namespace}}'
+                      - '{{ .environment.hyperShift.hostedCluster.hostedClusterNamespace }}'
                   - key: hypershift.openshift.io/request-serving-component
                     operator: In
                     values:
@@ -181,7 +181,7 @@ spec:
             - podAffinityTerm:
                 labelSelector:
                   matchLabels:
-                    hypershift.openshift.io/hosted-control-plane: '{{.package.metadata.namespace}}'
+                    hypershift.openshift.io/hosted-control-plane: '{{ .environment.hyperShift.hostedCluster.hostedClusterNamespace }}'
                 topologyKey: kubernetes.io/hostname
               weight: 100
         podAntiAffinity:
@@ -214,7 +214,7 @@ spec:
         - effect: NoSchedule
           key: hypershift.openshift.io/cluster
           operator: Equal
-          value: '{{.package.metadata.namespace}}'
+          value: '{{ .environment.hyperShift.hostedCluster.hostedClusterNamespace }}'
         - effect: NoSchedule
           key: hypershift.openshift.io/request-serving-component
           operator: Equal
@@ -248,13 +248,13 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   labels:
-    hypershift.openshift.io/hosted-control-plane: '{{.package.metadata.namespace}}'
+    hypershift.openshift.io/hosted-control-plane: '{{ .environment.hyperShift.hostedCluster.hostedClusterNamespace }}'
     hypershift.openshift.io/internal-route: "true"
   annotations:
     package-operator.run/phase: expose
   name: metrics-forwarder
 spec:
-  host: metrics-forwarder.apps.{{ with $x := .package.metadata.namespace }}{{ (splitn "-" 4 $x)._3 }}{{ end }}.hypershift.local
+  host: metrics-forwarder.apps.{{ .environment.hyperShift.hostedCluster.metadata.name }}.hypershift.local
   tls:
     insecureEdgeTerminationPolicy: None
     termination: passthrough
