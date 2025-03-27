@@ -7,21 +7,10 @@ spec:
     - Namespaced
   phases:
     - name: certman-issuer
-      objects:
-      - object: {apiVersion: cert-manager.io/v1, kind: Issuer}
     - name: certman-cert
-      objects:
-      - object: {apiVersion: cert-manager.io/v1, kind: Certificate}
     - name: config
-      objects:
-      - object: {apiVersion: v1, kind: ConfigMap}
     - name: deploy
-      objects:
-      - object: {apiVersion: apps, kind: Deployment}
     - name: expose
-      objects:
-      - object: {apiVersion: v1, kind: Service}
-      - object: {apiVersion: route.openshift.io/v1, kind: Route}
   availabilityProbes:
     - selector:
         kind:
