@@ -152,6 +152,10 @@ spec:
                     operator: In
                     values:
                       - 'ocm-staging-24o19ba52km496nvegb629918l9gbnvu-bmeng-hcp'
+                  - key: "selector-label"
+                    operator: In
+                    values:
+                    - "beeeeeg-node"
           preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 100
               preference:

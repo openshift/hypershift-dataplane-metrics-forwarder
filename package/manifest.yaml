@@ -22,10 +22,23 @@ spec:
           status: "True"
 test:
   template:
-  # default HyperShift HCP template test.
   - name: default
     context:
-      package:
-        metadata:
-          name: metrics-forwarder
-          namespace: ocm-staging-24o19ba52km496nvegb629918l9gbnvu-bmeng-hcp
+      environment:
+        hyperShift:
+          hostedCluster:
+            hostedClusterNamespace: ocm-staging-24o19ba52km496nvegb629918l9gbnvu-bmeng-hcp
+            metadata:
+              name: bmeng
+              annotations: {}
+  - name: dedicated-request-serving-nodes
+    context:
+      environment:
+        hyperShift:
+          hostedCluster:
+            hostedClusterNamespace: ocm-staging-24o19ba52km496nvegb629918l9gbnvu-bmeng-hcp
+            metadata:
+              name: bmeng
+              annotations:
+                hypershift.openshift.io/request-serving-node-additional-selector: selector-label=beeeeeg-node
+
