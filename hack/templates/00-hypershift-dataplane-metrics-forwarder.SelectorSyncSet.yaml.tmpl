@@ -30,7 +30,6 @@ objects:
             name: metrics-forwarder
             namespace: openshift-acm-policies
           spec:
-            pruneObjectBehavior: DeleteIfCreated
             disabled: false
             remediationAction: enforce
             policy-templates:
@@ -40,6 +39,7 @@ objects:
                   metadata:
                     name: metrics-forwarder
                   spec:
+                    pruneObjectBehavior: DeleteIfCreated
                     evaluationInterval:
                       compliant: 2m
                       noncompliant: 45s
