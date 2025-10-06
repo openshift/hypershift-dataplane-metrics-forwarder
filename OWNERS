@@ -1,14 +1,14 @@
 reviewers:
-  - wanghaoran1988
-  - feichashao
-  - MitaliBhalla
-  - Tafhim
-  - bmeng
-
+- srep-functional-team-rocket
 approvers:
-  - wanghaoran1988
-  - feichashao
-  - bmeng
-  - Tafhim
-  - srep-team-leads
-  - sre-architects
+- srep-functional-team-rocket
+- srep-functional-leads
+- srep-team-leads
+- sre-architects
+maintainers:
+- jharrington22
+- clcollins
+- dustman9000
+- Tafhim
+- bmeng
+- feichashao

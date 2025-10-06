@@ -1,8 +1,26 @@
 aliases:
   srep-team-leads:
-    - fahlmant
-    - dustman9000
-    - NautiluX
+    - rafael-azevedo
+    - iamkirkbater
     - rogbas
+    - dustman9000
+    - bng0y
+    - bmeng
+    - typeid
   sre-architects:
     - jharrington22
+  srep-functional-team-rocket:
+    - aliceh
+    - anispate
+    - clcollins
+    - Mhodesty
+    - nephomaniac
+    - tnierman
+  srep-functional-leads:
+    - abyrne55
+    - clcollins
+    - bergmannf
+    - theautoroboto
+    - smarthall
+    - sam-nguyen7
+    - ravitri
